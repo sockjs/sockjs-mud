@@ -5,7 +5,7 @@ This is a rough and dirty Mud game. Unlike games from early 80's this
 one uses web interface - you can play from your browser. It's
 presenting the power of
 [SockJS](https://github.com/majek/sockjs-client) and under the hood
-uses also Django.
+also uses Django.
 
 This code is derived from [flying squirrel
 demos](https://github.com/rabbitmq/flying-squirrel-demos).
