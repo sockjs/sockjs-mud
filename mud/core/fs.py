@@ -1,5 +1,7 @@
 from django.conf import settings
 import logging
+import Queue
+import threading
 log = logging.getLogger(__name__)
 
 import flyingsquirrel as squirrel
@@ -11,6 +13,15 @@ from . import mud
 api = None
 transport_socket_io = None
 webhooks_client = None
+transport_sockjs = None
+
+queue = Queue.Queue()
+class Sender(threading.Thread):
+    def run(self):
+        while True:
+            reply_to, msg =  queue.get()
+            webhooks_client.publish('pipe', msg, {'reply-to': reply_to})
+
 
 def safe_create_endpoint(name, definition):
     # Delete endpoint only if absolutely required.
@@ -26,7 +37,7 @@ def safe_create_endpoint(name, definition):
 
 def prepare():
     log.info(" [fs] preparing endpoints")
-    global api, transport_socket_io, webhooks_client
+    global api, transport_socket_io, webhooks_client, transport_sockjs
     api = squirrel.API(settings.SQUIRRUS_URL)
 
     endpoint = safe_create_endpoint("mud_server", {'world': ['pub', 'world'],
@@ -42,13 +53,18 @@ def prepare():
     endpoint = safe_create_endpoint("mud_client", {'world': ['sub', 'world'],
                                                    'pipe': ['req', 'mesh']})
     transport_socket_io = endpoint['protocols']['socket.io']
+    transport_sockjs = endpoint['protocols']['sockjs']
     log.info(" [fs] ok")
+    log.info("Starting worker thread %s", queue)
+    r = Sender()
+    r.start()
+
 
 def client_ticket():
     identity = utils.randstr(8)
 
     ticket = api.generate_ticket('mud_client', identity)
-    return (identity, transport_socket_io, ticket)
+    return (identity, transport_socket_io, transport_sockjs, ticket)
 
 
 def inbound_messages(msg, channel=None, msgobj=None, **kwargs):
@@ -64,8 +80,10 @@ def inbound_messages(msg, channel=None, msgobj=None, **kwargs):
         conn.send("\x00")
     flush()
 
+
 def flush():
     for reply_to, messages in models.OUTBOUND.iteritems():
-        webhooks_client.publish('pipe', '\n\r'.join(messages),
-                                {'reply-to': reply_to})
+        print "*************** %r %r" % (reply_to, messages)
+        queue.put( (reply_to, '\n\r'.join(messages)) )
     models.OUTBOUND.clear()
+

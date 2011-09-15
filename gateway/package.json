@@ -1,0 +1,10 @@
+{
+	"name": "mud-js",
+	"author": "Marek Majkowski",
+	"version": "0.0.0-unreleasable",
+        "dependencies": {
+                "node-static": "*",
+                "amqp": "*",
+                "sockjs": "*"
+        }
+}

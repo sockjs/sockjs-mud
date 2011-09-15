@@ -21,21 +21,20 @@ $(function () {
 
 $(function () {
       var opts = {debug: true};
-      var conn = new flyingsquirrel.Connection(transport_url, ticket, opts);
+      var conn = new SockJS(sockjs_url, undefined, opts);
 
       var to = null;
       var ping = function() {
-          conn.publish('pipe', "\x00");
+          conn.send("\x00");
           to = setTimeout(ping, 14000);
       };
 
-      conn.on_connect = function() {
+      conn.onopen = function() {
           conn.egress_buffer = [];
           to = setTimeout(ping, 14000);
-          conn.publish('pipe', 'hello');
-          //write("Connected.");
+          conn.send('hello');
       };
-      conn.on_disconnect = function() {
+      conn.onclose = function() {
           clearTimeout(to);
           to = null;
           write("Disconnected.");
@@ -45,18 +44,17 @@ $(function () {
       $("#form").submit(function() {
                             var val = $("#input").val();
                             $("#input").val('');
-                            conn.publish('pipe', val);
+                            conn.send(val);
                             scroll();
                             clearTimeout(to);
                             to = setTimeout(ping, 14000);
                             return false;
                         });
 
-      conn.subscribe('pipe', function(msg) {
-                         if (msg != "\x00") {
-                             write(msg);
-                         }
-                     });
-      conn.connect();
+      conn.onmessage = function(e) {
+          if (e.data != "\x00") {
+              write(e.data);
+          }
+      };
   });
 

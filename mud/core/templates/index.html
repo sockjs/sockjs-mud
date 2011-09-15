@@ -4,26 +4,19 @@
   <link rel="stylesheet" type="text/css" href="static/reset.css" />
   <link rel="stylesheet" type="text/css" href="static/main.css" />
 
-  <script type="text/javascript"
-          src="static/json2.js"></script>
+  <!-- <script type="text/javascript" -->
+  <!--         src="static/json2.js"></script> -->
   <script type="text/javascript"
           src="static/jquery-1.6.min.js"></script>
-  <!-- http://cdn.socket.io/stable/socket.io.js -->
-  <script type="text/javascript"
-          src="static/socket.io.js"></script>
-
-  <!-- http://cdn.squirr.us/flyingsquirrel-client-0.0.0.js -->
-  <script type="text/javascript"
-          src="static/flyingsquirrel-client-0.0.0.js"></script>
+  <script src="http://majek.github.com/sockjs-client/sockjs-latest.js">
+  </script>
 
   <script type="text/javascript"
           src="static/main.js"></script>
 </head>
 <body>
   <script>
-    var transport_url = "{{ transport_url }}";
-    var ticket = "{{ ticket }}";
-    var identity = "{{ identity }}";
+    var sockjs_url = "{{ sockjs_url }}";
   </script>
   <div id="maincolumn">
   <div id="box">

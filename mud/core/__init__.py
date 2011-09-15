@@ -1,3 +1,3 @@
 
-from . import fs
-fs.prepare()
+from . import puk
+puk.prepare()

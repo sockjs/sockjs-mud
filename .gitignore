@@ -1,0 +1,4 @@
+venv
+*.pyc
+gateway/node_modules
+
