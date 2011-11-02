@@ -33,7 +33,7 @@ def run_process():
         os._exit(1)
 
 def prepare():
-    log.info("Starting worker process")
+    log.info("Starting puka process")
     r = Process(target=run_process)
     r.start()
 
