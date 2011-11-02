@@ -19,11 +19,20 @@ class Room(models.Model):
             if ch not in skip:
                 ch._raw_send(data)
 
-    def exit(self, direction):
-        try:
-            return self.exits.get(keyword__exact=direction).dst
-        except Exit.DoesNotExist:
+    def exit(self, direction, no=1):
+        r = self.exits.filter(keyword__exact=direction)
+        if len(r) > no-1:
+            return r[no-1].dst
+        else:
             return None
+
+
+EXITS = (
+    ('n', 'North'),
+    ('s', 'South'),
+    ('w', 'West'),
+    ('e', 'East'),
+)
 
 
 
@@ -31,7 +40,7 @@ class Exit(models.Model):
     def __unicode__(self):
         return "%s --%s--> %s" % (self.src, self.keyword, self.dst)
 
-    keyword = models.CharField(max_length=32)
+    keyword = models.CharField(max_length=256, choices=EXITS)
     src = models.ForeignKey(Room, related_name='exits')
     dst = models.ForeignKey(Room, related_name='entries')
 
@@ -41,7 +50,7 @@ class Char(models.Model):
         return "%s" % (self.nick,)
 
     modified = models.DateTimeField(auto_now=True)
-    nick = models.CharField(max_length=32)
+    nick = models.CharField(max_length=256)
     room = models.ForeignKey(Room)
     reply = models.ForeignKey("self", null=True, blank=True)
     is_npc = models.BooleanField(default=False)
@@ -108,7 +117,7 @@ class Connection(models.Model):
         return "%s --> %s" % (self.reply_to, self.char)
 
     modified = models.DateTimeField(auto_now=True)
-    reply_to = models.CharField(max_length=32)
+    reply_to = models.CharField(max_length=256)
     char = models.ForeignKey(Char, null=True)
     state = models.CharField(max_length=16, default="connected")
 

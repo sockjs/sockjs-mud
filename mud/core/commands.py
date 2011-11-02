@@ -57,7 +57,12 @@ def do_look(actor, args=[], **kwargs):
         return
 
     what = args[0]
-    room = actor.room.exit(what)
+    no = 1
+    if len(args) > 1:
+        try:
+            no = max(1, int(args[1]))
+        except ValueError: pass
+    room = actor.room.exit(what, no=no)
     if room is not None:
         actor.render('room_brief.txt', {'room': room})
         return
@@ -72,7 +77,7 @@ def do_look(actor, args=[], **kwargs):
     else:
         actor.send("You see nothing there.")
 
-def do_go(actor, direction=None, **kwargs):
+def do_go(actor, args=[], direction=None, **kwargs):
     """ Go in a direction. """
     if actor.drunk >= STAGGERING:
         actor.render("stagger.txt")
@@ -80,7 +85,12 @@ def do_go(actor, direction=None, **kwargs):
         _do_move(actor, e, direction=direction,
                  bamf_in="stagger_in.txt", bamf_out="stagger_out.txt")
     else:
-        e = actor.room.exit(direction)
+        no = 1
+        if args:
+            try:
+                no = max(1, int(args[0]))
+            except ValueError: pass
+        e = actor.room.exit(direction, no=no)
         if not e:
             actor.send("You can't go there.")
             return actor
