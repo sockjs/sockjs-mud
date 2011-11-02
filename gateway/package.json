@@ -5,6 +5,6 @@
         "dependencies": {
                 "node-static": "*",
                 "amqp": "*",
-                "sockjs": "*"
+                "sockjs": "0.1"
         }
 }
