@@ -24,7 +24,7 @@ conn.on('ready', amqpSetup);
 
 
 var sockjs_opts = {
-    sockjs_url: "http://majek.github.com/sockjs-client/sockjs-latest.min.js",
+    sockjs_url: "http://cdn.sockjs.org/sockjs-0.1.min.js",
     disabled_transports: ['websocket']
 };
 
