@@ -8,7 +8,15 @@ log = logging.getLogger(__name__)
 
 from . import models
 from . import mud
+from . import signals
+import datetime
 
+import time
+
+def reconnect():
+    from django.db import connection
+    connection.connection.close()
+    connection.connection = None
 
 def run_process():
     client = puka.Client(settings.RABBITMQ_URL)
@@ -18,14 +26,30 @@ def run_process():
     client.wait(promise)
 
     consume_promise = client.basic_consume(queue='mud', prefetch_count=1)
+    t0 = time.time()
     try:
+        reconnect()
         while True:
-            result = client.wait(consume_promise)
-            got = json.loads(result['body'])
-            reply_to = got['id'] + ' ' + got['reply-to']
-            inbound_message(reply_to, got['data'], got.get('closed', False))
+            result = client.wait(consume_promise, timeout=30)
+            if result is not None:
+                got = json.loads(result['body'])
+                reply_to = got['id'] + ' ' + got['reply-to']
+                try:
+                    inbound_message(reply_to, got['data'], got.get('closed', False))
+                except Exception:
+                    log.error("Exception in timer:", exc_info=True)
+                    reconnect()
 
-            client.basic_ack(result)
+                client.basic_ack(result)
+            if time.time() - t0 >= 30.0:
+                try:
+                    signals.tick_event.send(sender=None,
+                                            curr_time=datetime.datetime.now())
+                except Exception:
+                    log.error("Exception in timer:", exc_info=True)
+                    reconnect()
+                t0 = time.time()
+            flush()
     except Exception, e:
         log.error("Exception in process:", exc_info=True)
         promise = client.close()
@@ -69,7 +93,6 @@ def inbound_message(reply_to, msg, closed):
             mud.inbound(conn, msg)
         else:
             conn.send("\x00")
-        flush()
     else:
         try:
             conn = models.Connection.objects.get(reply_to__exact=reply_to)
