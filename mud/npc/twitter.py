@@ -12,11 +12,10 @@ from mud.core import models
 from mud.core.signals import tick_event
 
 try:
-    os.mkdir('.cache')
-except OSError:
-    pass
+    H = httplib2.Http(disable_ssl_certificate_validation=True)
+except TypeError:
+    H = httplib2.Http()
 
-H = httplib2.Http('.cache', disable_ssl_certificate_validation=True)
 H.add_credentials(settings.IDENTICA_USER,
                   settings.IDENTICA_PASS,
                   'identi.ca')
