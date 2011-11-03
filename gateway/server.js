@@ -45,12 +45,20 @@ sjs.on('open', function(s) {
                s.send(msg);
            };
            console.log(id + " created");
+           var t = setInterval(function(){
+                                   try{
+                                       s.conn._session.recv.didClose();
+                                   } catch (x) {
+                                   }
+                               }, 15000);
            s.on('message', function(e) {
                     conn.publish('mud', {data: e.data,
                                          'reply-to': 'mud-' + client_id,
                                          id: id});
                 });
            s.on('close', function() {
+                    clearInterval(t);
+                    t = null;
                     conn.publish('mud', {data: '',
                                          closed: true,
                                          'reply-to': 'mud-' + client_id,
