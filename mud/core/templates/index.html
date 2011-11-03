@@ -17,6 +17,13 @@
 <body>
   <script>
     var sockjs_url = "{{ sockjs_url }}";
+    // Disable websockets. Set to `undefined` for defaults.
+    var sockjs_protocols = ['xhr-streaming',
+                       'iframe-eventsource',
+                       'iframe-htmlfile',
+                       'xhr-polling',
+                       'iframe-xhr-polling',
+                       'jsonp-polling'];
   </script>
   <div id="maincolumn">
   <div id="box">

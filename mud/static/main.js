@@ -21,7 +21,7 @@ $(function () {
 
 $(function () {
       var opts = {debug: true};
-      var conn = new SockJS(sockjs_url, undefined, opts);
+      var conn = new SockJS(sockjs_url, sockjs_protocols, opts);
 
       var to = null;
       var ping = function() {
