@@ -2,6 +2,8 @@ import os
 import urllib
 import httplib2
 import json
+import logging
+log = logging.getLogger(__name__)
 
 from django.conf import settings
 
@@ -10,11 +12,11 @@ from mud.core import models
 from mud.core.signals import tick_event
 
 try:
-    os.mkdir('/tmp/.cache')
+    os.mkdir('.cache')
 except OSError:
     pass
 
-H = httplib2.Http('/tmp/.cache')
+H = httplib2.Http('.cache', disable_ssl_certificate_validation=True)
 H.add_credentials(settings.IDENTICA_USER,
                   settings.IDENTICA_PASS,
                   'identi.ca')
@@ -44,8 +46,8 @@ def got_tell(actor=None, target=None, text=None, **kwargs):
     try:
         tid = identica_post('%s: %s' % (actor, text))
     except Exception, e:
+        log.error("Exception in bird:", exc_info=True)
         commands._do_tell(target, actor, "I tell you nothing!")
-        raise
     else:
         commands._do_say(target, "Tweet, tweet! (id=%s)" % (tid,))
 

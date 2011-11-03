@@ -47,8 +47,7 @@ def run_process():
     while True:
         try:
             time.sleep(10)
-            tick_event.send(sender=request,
-                                    curr_time=datetime.datetime.now())
+            tick_event.send(sender=None, curr_time=datetime.datetime.now())
             puk.flush()
             errors = 0
         except Exception, e:
